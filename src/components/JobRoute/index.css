@@ -70,6 +70,7 @@
   padding: 10px;
   border: none;
   width: 300px;
+  color: #f1f1f1;
 }
 .search-input-container {
   display: flex;
@@ -91,6 +92,15 @@
   color: #ffffff;
   width: 16px;
   height: 28px;
+}
+
+.no-jobs-view-container {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+.no-jobs-view-image {
+  width: 400px;
 }
 .jobs-list {
   display: flex;
@@ -127,4 +137,9 @@
 .failure-view-description {
   color: #ffffff;
   font-family: 'Roboto';
+}
+.loader-container {
+  display: flex;
+  justify-content: center;
+  padding-top: 40px;
 }

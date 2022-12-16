@@ -53,7 +53,14 @@ const salaryRangesList = [
 ]
 
 class JobRoute extends Component {
-  state = {profileData: {}, jobsList: [], apiStatus: apiStatusConstants.initial}
+  state = {
+    profileData: {},
+    searchInput: '',
+    jobsList: [],
+    apiStatus: apiStatusConstants.initial,
+    employmentId: [],
+    salaryPackage: '',
+  }
 
   componentDidMount() {
     this.getProfileDetails()
@@ -62,7 +69,12 @@ class JobRoute extends Component {
 
   getJobsDetails = async () => {
     this.setState({apiStatus: apiStatusConstants.inProgress})
-    const jobsApiUrl = 'https://apis.ccbp.in/jobs'
+
+    const {salaryPackage, employmentId, searchInput} = this.state
+
+    const jobsApiUrl = `https://apis.ccbp.in/jobs?employment_type=${employmentId.slice(
+      1,
+    )}&minimum_package=${salaryPackage}&search=${searchInput}`
     const jwtToken = Cookies.get('jwt_token')
     const options = {
       method: 'GET',
@@ -82,7 +94,7 @@ class JobRoute extends Component {
       rating: eachJob.rating,
       title: eachJob.title,
     }))
-    console.log(updatedData)
+
     if (response.ok === true) {
       this.setState({
         apiStatus: apiStatusConstants.success,
@@ -120,11 +132,25 @@ class JobRoute extends Component {
     this.setState({profileData: updatedProfileData})
   }
 
+  onSelectTypeOfEmployment = event => {
+    this.setState(
+      prevState => ({
+        employmentId: [prevState.employmentId, event.target.value].join(','),
+      }),
+      this.getJobsDetails,
+    )
+  }
+
   renderTypeOfEmployment = () => (
     <ul className="list-items-container">
       {employmentTypesList.map(eachType => (
         <li key={eachType.employmentTypeId}>
-          <input id={eachType.employmentTypeId} type="checkbox" />
+          <input
+            onClick={this.onSelectTypeOfEmployment}
+            value={eachType.employmentTypeId}
+            id={eachType.employmentTypeId}
+            type="checkbox"
+          />
           <label className="label" htmlFor={eachType.employmentTypeId}>
             {eachType.label}
           </label>
@@ -133,11 +159,21 @@ class JobRoute extends Component {
     </ul>
   )
 
+  onSelectPackage = event => {
+    this.setState({salaryPackage: event.target.value}, this.getJobsDetails)
+  }
+
   renderSalaryRanges = () => (
     <ul className="list-items-container">
       {salaryRangesList.map(eachItem => (
         <li key={eachItem.salaryRangeId}>
-          <input id={eachItem.salaryRangeId} type="radio" />
+          <input
+            onChange={this.onSelectPackage}
+            id={eachItem.salaryRangeId}
+            type="radio"
+            value={eachItem.salaryRangeId}
+            name="salary"
+          />
           <label className="label" htmlFor={eachItem.salaryRangeId}>
             {eachItem.label}
           </label>
@@ -146,8 +182,23 @@ class JobRoute extends Component {
     </ul>
   )
 
+  renderNoJobsView = () => (
+    <div className="no-jobs-view-container">
+      <img
+        className="no-jobs-view-image"
+        src="https://assets.ccbp.in/frontend/react-js/no-jobs-img.png"
+        alt="no jobs"
+      />
+    </div>
+  )
+
   renderSuccessView = () => {
     const {jobsList} = this.state
+
+    if (jobsList.length === 0) {
+      return this.renderNoJobsView()
+    }
+
     return (
       <ul className="jobs-list">
         {jobsList.map(eachJob => (
@@ -188,22 +239,43 @@ class JobRoute extends Component {
     }
   }
 
-  renderJobsList = () => (
-    <div className="jobs-list-container">
-      <div className="search-input-container">
-        <input type="search" className="search" placeholder="Search" />
-        <button className="search-button" type="button">
-          <BsSearch className="search-icon" />
-        </button>
+  onClickEnter = event => {
+    if (event.key === 'Enter') {
+      this.setState({searchInput: event.target.value}, this.getJobsDetails)
+    }
+  }
+
+  onChangeSearchInput = event => {
+    this.setState({searchInput: event.target.value})
+  }
+
+  renderJobsList = () => {
+    const {searchInput} = this.state
+    return (
+      <div className="jobs-list-container">
+        <div className="search-input-container">
+          <input
+            onChange={this.onChangeSearchInput}
+            onKeyDown={this.onClickEnter}
+            value={searchInput}
+            type="search"
+            className="search"
+            placeholder="Search"
+          />
+          <button className="search-button" type="button">
+            <BsSearch className="search-icon" />
+          </button>
+        </div>
+        {this.renderAllViews()}
       </div>
-      {this.renderAllViews()}
-    </div>
-  )
+    )
+  }
 
   render() {
     const {profileData} = this.state
     const {name, profileImageUrl, shortBio} = profileData
     const isProfile = profileData.length !== 0
+
     return (
       <div className="jobs-container">
         <Header />
