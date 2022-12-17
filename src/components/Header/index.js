@@ -2,12 +2,14 @@ import {Link, withRouter} from 'react-router-dom'
 import {BsFillBriefcaseFill} from 'react-icons/bs'
 import {AiFillHome} from 'react-icons/ai'
 import {FiLogOut} from 'react-icons/fi'
+import Cookies from 'js-cookie'
 
 import './index.css'
 
 const Header = props => {
   const onClickLogout = () => {
     const {history} = props
+    Cookies.remove('jwt_token')
     history.replace('/login')
   }
 

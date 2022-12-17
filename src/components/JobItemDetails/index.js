@@ -1,6 +1,11 @@
 import {Component} from 'react'
 import Cookies from 'js-cookie'
 import Loader from 'react-loader-spinner'
+
+import {AiFillStar} from 'react-icons/ai'
+import {MdLocationOn} from 'react-icons/md'
+import {BsFillBriefcaseFill} from 'react-icons/bs'
+import {BiLinkExternal} from 'react-icons/bi'
 import Header from '../Header'
 
 import './index.css'
@@ -13,7 +18,7 @@ const apisStatusConstants = {
 }
 
 class JobItemDetails extends Component {
-  state = {jobDetails: {}, apiStatus: apisStatusConstants.initial}
+  state = {jobDetailsData: {}, apiStatus: apisStatusConstants.initial}
 
   componentDidMount() {
     this.getJobItemDetails()
@@ -72,7 +77,7 @@ class JobItemDetails extends Component {
 
     if (response.ok === true) {
       this.setState({
-        jobDetails: updatedData,
+        jobDetailsData: updatedData,
         apiStatus: apisStatusConstants.success,
       })
     } else {
@@ -80,7 +85,117 @@ class JobItemDetails extends Component {
     }
   }
 
-  renderSuccessView = () => {}
+  renderSuccessView = () => {
+    const {jobDetailsData} = this.state
+    const {jobDetails, similarJobs} = jobDetailsData
+    const {
+      companyLogoUrl,
+      companyWebsiteUrl,
+      employmentType,
+      jobDescription,
+      lifeAtCompany,
+      location,
+      packagePerAnnum,
+      rating,
+      skills,
+      title,
+    } = jobDetails
+    return (
+      <div className="job-item-details-container">
+        <div className="job-details-item-card">
+          <div className="logo-title-container">
+            <img
+              className="company-logo"
+              src={companyLogoUrl}
+              alt="job details company logo"
+            />
+            <div className="job-title-and-rating">
+              <h1 className="job-title">{title}</h1>
+              <div className="job-details-card">
+                <AiFillStar className="star" />
+                <p className="rating">{rating}</p>
+              </div>
+            </div>
+          </div>
+          <div className="location-salary-container">
+            <div className="job-details-card">
+              <MdLocationOn size="20" color="#ffffff" />
+              <p className="job-details">{location}</p>
+            </div>
+            <div className="job-details-card">
+              <BsFillBriefcaseFill size="20" color="#ffffff" />
+              <p className="job-details">{employmentType}</p>
+            </div>
+            <p className="salary">{packagePerAnnum}</p>
+          </div>
+          <hr className="hr-line" />
+          <div className="website-container">
+            <h1 className="job-description-title">Description</h1>
+            <a href={companyWebsiteUrl} className="visit-link">
+              Visit
+              <BiLinkExternal size="20" />
+            </a>
+          </div>
+          <p className="job-details-description">{jobDescription}</p>
+          <h1 className="details-heading">Skills</h1>
+          <ul className="skills-container">
+            {skills.map(skill => (
+              <li className="skill-card" key={skill.name}>
+                <img
+                  className="skill-image"
+                  src={skill.imageUrl}
+                  alt={skill.name}
+                />
+                <p className="skill-name">{skill.name}</p>
+              </li>
+            ))}
+          </ul>
+          <h1 className="details-heading">Life at Company</h1>
+          <div className="life-at-company-card">
+            <p className="life-at-company">{lifeAtCompany.description}</p>
+            <img
+              className="life-at-company-image"
+              src={lifeAtCompany.imageUrl}
+              alt="life at company"
+            />
+          </div>
+        </div>
+        <h1 className="similar-jobs-heading">Similar jobs</h1>
+        <ul className="similar-jobs-container">
+          {similarJobs.map(job => (
+            <li className="similar-job-list-container">
+              <div className="similar-job-logo-title-container">
+                <img
+                  className="company-logo"
+                  src={job.companyLogoUrl}
+                  alt="similar job company logo"
+                />
+                <div className="job-title-and-rating">
+                  <h1 className="job-title">{job.title}</h1>
+                  <div className="job-details-card">
+                    <AiFillStar className="star" />
+                    <p className="rating">{job.rating}</p>
+                  </div>
+                </div>
+              </div>
+              <h1 className="job-description-title">Description</h1>
+              <p className="job-details-description">{jobDescription}</p>
+              <div className="location-salary-container">
+                <div className="job-details-card">
+                  <MdLocationOn size="20" color="#ffffff" />
+                  <p className="job-details">{job.location}</p>
+                </div>
+                <div className="job-details-card">
+                  <BsFillBriefcaseFill size="20" color="#ffffff" />
+                  <p className="job-details">{job.employmentType}</p>
+                </div>
+              </div>
+            </li>
+          ))}
+        </ul>
+      </div>
+    )
+  }
 
   renderFailureView = () => (
     <div className="failure-view">
